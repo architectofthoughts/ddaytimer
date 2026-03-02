@@ -1,0 +1,7 @@
+name = "ddaytimer"
+pages_build_output_dir = "dist"
+compatibility_date = "2025-01-01"
+
+[[kv_namespaces]]
+binding = "SYNC_KV"
+id = "06338ce721f7486f847119a0d4728f82"

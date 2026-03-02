@@ -1,0 +1,99 @@
+/* ===== CSS Variables ===== */
+:root,
+[data-theme="light"] {
+  --bg-primary: #FAFAF8;
+  --bg-secondary: rgba(255, 255, 255, 0.85);
+  --bg-card: #FFFFFF;
+  --bg-card-hover: #F7F5F0;
+  --bg-input: #F5F3EF;
+  --text-primary: #1A1A1A;
+  --text-secondary: #6B6560;
+  --text-muted: #9C948C;
+  --border-color: rgba(139, 115, 85, 0.12);
+  --shadow-sm: 0 1px 3px rgba(107, 91, 71, 0.06);
+  --shadow-md: 0 4px 16px rgba(107, 91, 71, 0.08);
+  --shadow-lg: 0 8px 32px rgba(107, 91, 71, 0.1);
+  --gradient-start: #A0845C;
+  --gradient-end: #7B6544;
+  --accent: #8B7355;
+  --accent-light: #A0845C;
+  --accent-bg: rgba(139, 115, 85, 0.08);
+  --flip-bg: #3D3429;
+  --flip-text: #FAF8F5;
+  --overlay-bg: rgba(30, 26, 20, 0.4);
+  --progress-track: #EBE6DE;
+  --progress-glow: rgba(160, 132, 92, 0.45);
+  --fun-card-bg: #F8F5F0;
+  --danger: #C9524D;
+  --danger-bg: rgba(201, 82, 77, 0.08);
+}
+
+[data-theme="dark"] {
+  --bg-primary: #1E1A14;
+  --bg-secondary: rgba(44, 36, 24, 0.9);
+  --bg-card: #2C2418;
+  --bg-card-hover: #3D3429;
+  --bg-input: #2C2418;
+  --text-primary: #EDE8E0;
+  --text-secondary: #B5AA9A;
+  --text-muted: #8A7E70;
+  --border-color: rgba(237, 232, 224, 0.08);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --gradient-start: #A0845C;
+  --gradient-end: #C4A676;
+  --accent: #C4A676;
+  --accent-light: #D4B88A;
+  --accent-bg: rgba(196, 166, 118, 0.1);
+  --flip-bg: #1A1610;
+  --flip-text: #F0EAE0;
+  --overlay-bg: rgba(10, 8, 5, 0.6);
+  --progress-track: #3D3429;
+  --progress-glow: rgba(196, 166, 118, 0.4);
+  --fun-card-bg: rgba(196, 166, 118, 0.06);
+  --danger: #E0706B;
+  --danger-bg: rgba(224, 112, 107, 0.1);
+}
+
+/* ===== Reset & Base ===== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: inherit;
+  color: inherit;
+  padding: 0;
+}
+
+input {
+  font-family: inherit;
+  color: inherit;
+}
