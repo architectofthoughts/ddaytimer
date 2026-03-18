@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useEffectEvent, useRef, useState } from 'react';
 
 interface FlipDigitProps {
   value: number;
@@ -10,15 +10,19 @@ export default function FlipDigit({ value, label }: FlipDigitProps) {
   const [flipping, setFlipping] = useState(false);
   const prevValue = useRef(value);
 
+  const runFlip = useEffectEvent((nextValue: number) => {
+    setFlipping(true);
+    return window.setTimeout(() => {
+      setDisplayValue(nextValue);
+      setFlipping(false);
+    }, 300);
+  });
+
   useEffect(() => {
     if (prevValue.current !== value) {
-      setFlipping(true);
-      const timer = setTimeout(() => {
-        setDisplayValue(value);
-        setFlipping(false);
-      }, 300);
+      const timer = runFlip(value);
       prevValue.current = value;
-      return () => clearTimeout(timer);
+      return () => window.clearTimeout(timer);
     }
   }, [value]);
 

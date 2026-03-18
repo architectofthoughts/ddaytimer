@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useEffectEvent, useRef } from 'react';
 import type { TimeRemaining } from '../types';
 import { getTimeRemaining, getAwakeTimeRemaining } from '../utils/time';
 
@@ -12,9 +12,13 @@ export function useCountdown(targetDate: string, sleepHours: number) {
   const wasComplete = useRef(false);
   const [justCompleted, setJustCompleted] = useState(false);
 
-  useEffect(() => {
+  const resetCompletion = useEffectEvent(() => {
     wasComplete.current = false;
     setJustCompleted(false);
+  });
+
+  useEffect(() => {
+    resetCompletion();
   }, [targetDate]);
 
   useEffect(() => {

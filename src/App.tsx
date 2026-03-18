@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useEffectEvent } from 'react';
 import type { DDay, ArchivedDDay, EmotionLog } from './types';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { useTheme } from './hooks/useTheme';
 import { useSync } from './hooks/useSync';
+import { useInstallPrompt } from './hooks/useInstallPrompt';
 import { decodeShareUrl } from './utils/share';
 import Header from './components/Header';
 import DDayCard from './components/DDayCard';
@@ -17,6 +18,7 @@ type View = 'dday' | 'kanban' | 'history';
 
 export default function App() {
   const { status: syncStatus } = useSync();
+  const { canInstall, promptInstall } = useInstallPrompt();
   const [theme, toggleTheme] = useTheme();
   const [view, setView] = useLocalStorage<View>('app-view', 'kanban');
   const [ddays, setDdays] = useLocalStorage<DDay[]>('dday-list', []);
@@ -25,13 +27,17 @@ export default function App() {
   const [showForm, setShowForm] = useState(false);
   const [sharedData, setSharedData] = useState<Partial<DDay> | null>(null);
 
+  const applySharedLink = useEffectEvent((shared: Partial<DDay>) => {
+    setSharedData(shared);
+    setShowForm(true);
+    setView('dday');
+    window.history.replaceState({}, '', window.location.pathname);
+  });
+
   useEffect(() => {
     const shared = decodeShareUrl();
     if (shared) {
-      setSharedData(shared);
-      setShowForm(true);
-      setView('dday');
-      window.history.replaceState({}, '', window.location.pathname);
+      applySharedLink(shared);
     }
   }, [setView]);
 
@@ -61,6 +67,7 @@ export default function App() {
         const log: EmotionLog = JSON.parse(raw);
         delete log[id];
         localStorage.setItem('emotion-log', JSON.stringify(log));
+        window.dispatchEvent(new CustomEvent('local-storage-change', { detail: { key: 'emotion-log' } }));
       } catch { /* skip */ }
     }
   };
@@ -107,6 +114,8 @@ export default function App() {
       <Header
         theme={theme}
         onToggleTheme={toggleTheme}
+        showInstall={canInstall}
+        onInstall={() => { void promptInstall(); }}
         onAddNew={() => { setView('dday'); setShowForm(true); }}
       />
 
@@ -114,6 +123,12 @@ export default function App() {
       <div className={`sync-indicator ${syncStatus}`}>
         {syncStatus === 'syncing' && (
           <><span className="sync-spinner" /> 동기화 중...</>
+        )}
+        {syncStatus === 'offline' && (
+          <><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 15a8 8 0 0116 0" /><path d="M12 19h.01" /></svg> 오프라인 모드</>
+        )}
+        {syncStatus === 'pending' && (
+          <><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 8v4l3 2" /><circle cx="12" cy="12" r="9" /></svg> 오프라인 변경 사항 대기 중</>
         )}
         {syncStatus === 'synced' && (
           <><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M20 6L9 17l-5-5" /></svg> 동기화 완료</>
