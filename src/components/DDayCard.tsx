@@ -3,6 +3,7 @@ import confetti from 'canvas-confetti';
 import type { DDay } from '../types';
 import { useCountdown } from '../hooks/useCountdown';
 import { useEmotionLog } from '../hooks/useEmotionLog';
+import { useJourneyInsights } from '../hooks/useJourneyInsights';
 import CountdownDisplay from './CountdownDisplay';
 import ProgressBar from './ProgressBar';
 import FunFacts from './FunFacts';
@@ -11,6 +12,7 @@ import TimeCapsuleTeaser from './TimeCapsuleTeaser';
 import TimeCapsuleReveal from './TimeCapsuleReveal';
 import EmotionPicker from './EmotionPicker';
 import EmotionTimeline from './EmotionTimeline';
+import MomentumLab from './MomentumLab';
 
 interface DDayCardProps {
   dday: DDay;
@@ -24,6 +26,13 @@ export default function DDayCard({ dday, isSelected, onSelect, onDelete, onArchi
   const { timeRemaining, awakeTimeRemaining, justCompleted, setJustCompleted } =
     useCountdown(dday.targetDate, dday.sleepHours);
   const { todayEntry, entries, logEmotion } = useEmotionLog(dday.id);
+  const journeyInsight = useJourneyInsights(
+    dday.startDate,
+    dday.targetDate,
+    awakeTimeRemaining.total,
+    entries,
+    timeRemaining.isComplete,
+  );
   const [showCapsuleReveal, setShowCapsuleReveal] = useState(false);
   const [autoRevealDone, setAutoRevealDone] = useState(false);
 
@@ -172,6 +181,8 @@ export default function DDayCard({ dday, isSelected, onSelect, onDelete, onArchi
           targetDate={dday.targetDate}
         />
       )}
+
+      <MomentumLab insight={journeyInsight} />
 
       <FunFacts totalMs={timeRemaining.total} />
 
