@@ -12,13 +12,18 @@ export default function FlipDigit({ value, label }: FlipDigitProps) {
 
   useEffect(() => {
     if (prevValue.current !== value) {
-      setFlipping(true);
-      const timer = setTimeout(() => {
+      const flipTimer = window.setTimeout(() => {
+        setFlipping(true);
+      }, 0);
+      const timer = window.setTimeout(() => {
         setDisplayValue(value);
         setFlipping(false);
       }, 300);
       prevValue.current = value;
-      return () => clearTimeout(timer);
+      return () => {
+        window.clearTimeout(flipTimer);
+        window.clearTimeout(timer);
+      };
     }
   }, [value]);
 

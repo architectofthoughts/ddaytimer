@@ -14,7 +14,10 @@ export function useCountdown(targetDate: string, sleepHours: number) {
 
   useEffect(() => {
     wasComplete.current = false;
-    setJustCompleted(false);
+    const timer = window.setTimeout(() => {
+      setJustCompleted(false);
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [targetDate]);
 
   useEffect(() => {

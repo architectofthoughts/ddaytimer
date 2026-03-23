@@ -3,8 +3,9 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 const SYNC_KEYS = ['dday-list', 'kanban-data', 'kanban-range', 'emotion-log', 'dday-archive'];
 const SYNC_URL = '/api/sync';
 const DEBOUNCE_MS = 1500;
+const MAX_PENDING_CHANGES = 99;
 
-type SyncStatus = 'idle' | 'syncing' | 'synced' | 'error';
+export type SyncStatus = 'idle' | 'syncing' | 'synced' | 'offline' | 'disabled' | 'error';
 
 function getSyncPayload(): Record<string, unknown> {
   const payload: Record<string, unknown> = {};
@@ -27,17 +28,47 @@ function applySyncData(data: Record<string, unknown>) {
   }
 }
 
-export function useSync(): { status: SyncStatus; lastSynced: number | null; forceSync: () => void } {
-  const [status, setStatus] = useState<SyncStatus>('idle');
+export function useSync(): {
+  status: SyncStatus;
+  lastSynced: number | null;
+  forceSync: () => void;
+  pendingChanges: number;
+  isOnline: boolean;
+} {
+  const [status, setStatus] = useState<SyncStatus>(() => window.navigator.onLine ? 'idle' : 'offline');
   const [lastSynced, setLastSynced] = useState<number | null>(null);
+  const [pendingChanges, setPendingChanges] = useState(0);
+  const [isOnline, setIsOnline] = useState(() => window.navigator.onLine);
+  const [remoteSyncEnabled, setRemoteSyncEnabled] = useState(true);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const pushingRef = useRef(false);
+  const queuePendingChange = useCallback(() => {
+    setPendingChanges(prev => Math.min(prev + 1, MAX_PENDING_CHANGES));
+  }, []);
+
+  const disableRemoteSync = useCallback(() => {
+    setRemoteSyncEnabled(false);
+    setPendingChanges(0);
+    setStatus('disabled');
+  }, []);
 
   // Pull from server
   const pull = useCallback(async () => {
+    if (!remoteSyncEnabled) return;
+    if (!window.navigator.onLine) {
+      setIsOnline(false);
+      setStatus('offline');
+      return;
+    }
+
     try {
+      setIsOnline(true);
       setStatus('syncing');
       const res = await fetch(SYNC_URL);
+      if (res.status === 404 || res.status === 405 || res.status === 501) {
+        disableRemoteSync();
+        return;
+      }
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       if (data && typeof data === 'object' && Object.keys(data).length > 0) {
@@ -46,15 +77,28 @@ export function useSync(): { status: SyncStatus; lastSynced: number | null; forc
       setStatus('synced');
       setLastSynced(Date.now());
     } catch {
+      if (!window.navigator.onLine) {
+        setIsOnline(false);
+        setStatus('offline');
+        return;
+      }
       setStatus('error');
     }
-  }, []);
+  }, [disableRemoteSync, remoteSyncEnabled]);
 
   // Push to server
   const push = useCallback(async () => {
+    if (!remoteSyncEnabled) return;
     if (pushingRef.current) return;
+    if (!window.navigator.onLine) {
+      setIsOnline(false);
+      setStatus('offline');
+      return;
+    }
+
     pushingRef.current = true;
     try {
+      setIsOnline(true);
       setStatus('syncing');
       const payload = getSyncPayload();
       const res = await fetch(SYNC_URL, {
@@ -62,45 +106,97 @@ export function useSync(): { status: SyncStatus; lastSynced: number | null; forc
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
+      if (res.status === 404 || res.status === 405 || res.status === 501) {
+        disableRemoteSync();
+        return;
+      }
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       setStatus('synced');
       setLastSynced(Date.now());
+      setPendingChanges(0);
     } catch {
+      if (!window.navigator.onLine) {
+        setIsOnline(false);
+        setStatus('offline');
+        return;
+      }
+      queuePendingChange();
       setStatus('error');
     } finally {
       pushingRef.current = false;
     }
-  }, []);
+  }, [disableRemoteSync, queuePendingChange, remoteSyncEnabled]);
 
   // Debounced push
   const debouncedPush = useCallback(() => {
+    if (!remoteSyncEnabled) return;
+    if (!window.navigator.onLine) {
+      setIsOnline(false);
+      queuePendingChange();
+      setStatus('offline');
+      return;
+    }
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(push, DEBOUNCE_MS);
-  }, [push]);
+    debounceRef.current = setTimeout(() => {
+      void push();
+    }, DEBOUNCE_MS);
+  }, [push, queuePendingChange, remoteSyncEnabled]);
 
   // Pull on mount
   useEffect(() => {
-    pull();
+    void pull();
   }, [pull]);
 
   // Listen for local storage changes and push
   useEffect(() => {
     const handleChange = (e: Event) => {
       const key = (e as CustomEvent).detail?.key;
-      if (SYNC_KEYS.includes(key)) {
+      if (SYNC_KEYS.includes(key) && remoteSyncEnabled) {
         debouncedPush();
       }
     };
+
+    const handleOnline = () => {
+      setIsOnline(true);
+      if (!remoteSyncEnabled) return;
+      if (pendingChanges > 0) {
+        void push();
+        return;
+      }
+      void pull();
+    };
+
+    const handleOffline = () => {
+      setIsOnline(false);
+      if (remoteSyncEnabled) {
+        setStatus('offline');
+      }
+    };
+
     window.addEventListener('local-storage-change', handleChange);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
     return () => {
       window.removeEventListener('local-storage-change', handleChange);
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [debouncedPush]);
+  }, [debouncedPush, pendingChanges, pull, push, remoteSyncEnabled]);
 
   const forceSync = useCallback(async () => {
+    if (!remoteSyncEnabled) return;
+    if (!window.navigator.onLine) {
+      setIsOnline(false);
+      setStatus('offline');
+      return;
+    }
+    if (pendingChanges > 0) {
+      await push();
+    }
     await pull();
-  }, [pull]);
+  }, [pendingChanges, pull, push, remoteSyncEnabled]);
 
-  return { status, lastSynced, forceSync };
+  return { status, lastSynced, forceSync, pendingChanges, isOnline };
 }

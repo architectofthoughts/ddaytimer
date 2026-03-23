@@ -3,6 +3,7 @@ import type { DDay, ArchivedDDay, EmotionLog } from './types';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { useTheme } from './hooks/useTheme';
 import { useSync } from './hooks/useSync';
+import { usePWA } from './hooks/usePWA';
 import { decodeShareUrl } from './utils/share';
 import Header from './components/Header';
 import DDayCard from './components/DDayCard';
@@ -11,12 +12,22 @@ import QuoteDisplay from './components/QuoteDisplay';
 import EmptyState from './components/EmptyState';
 import KanbanBoard from './components/KanbanBoard';
 import HistoryTimeline from './components/HistoryTimeline';
+import PWAControlCenter from './components/PWAControlCenter';
 import './App.css';
 
 type View = 'dday' | 'kanban' | 'history';
 
 export default function App() {
-  const { status: syncStatus } = useSync();
+  const { status: syncStatus, lastSynced, forceSync, pendingChanges, isOnline } = useSync();
+  const {
+    isInstalled,
+    isInstallable,
+    needRefresh,
+    offlineReady,
+    installApp,
+    dismissNotice,
+    applyUpdate,
+  } = usePWA();
   const [theme, toggleTheme] = useTheme();
   const [view, setView] = useLocalStorage<View>('app-view', 'kanban');
   const [ddays, setDdays] = useLocalStorage<DDay[]>('dday-list', []);
@@ -27,12 +38,16 @@ export default function App() {
 
   useEffect(() => {
     const shared = decodeShareUrl();
-    if (shared) {
+    if (!shared) return;
+
+    const timer = window.setTimeout(() => {
       setSharedData(shared);
       setShowForm(true);
       setView('dday');
       window.history.replaceState({}, '', window.location.pathname);
-    }
+    }, 0);
+
+    return () => window.clearTimeout(timer);
   }, [setView]);
 
   useEffect(() => {
@@ -118,6 +133,18 @@ export default function App() {
         {syncStatus === 'synced' && (
           <><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M20 6L9 17l-5-5" /></svg> 동기화 완료</>
         )}
+        {syncStatus === 'offline' && (
+          <>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M2 8.82a15 15 0 0120 0" />
+              <path d="M5 12.86a10 10 0 0114 0" />
+              <path d="M8.5 16.89a5 5 0 017 0" />
+              <path d="M12 20h.01" />
+              <path d="M3 3l18 18" />
+            </svg>
+            오프라인 모드{pendingChanges > 0 ? ` · ${pendingChanges}건 대기 중` : ''}
+          </>
+        )}
         {syncStatus === 'error' && (
           <><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><path d="M12 8v4M12 16h.01" /></svg> 동기화 실패</>
         )}
@@ -159,6 +186,21 @@ export default function App() {
       </nav>
 
       <main className="app-main">
+        <PWAControlCenter
+          isOnline={isOnline}
+          isInstalled={isInstalled}
+          isInstallable={isInstallable}
+          needRefresh={needRefresh}
+          offlineReady={offlineReady}
+          pendingChanges={pendingChanges}
+          syncStatus={syncStatus}
+          lastSynced={lastSynced}
+          onInstall={installApp}
+          onApplyUpdate={applyUpdate}
+          onDismissNotice={dismissNotice}
+          onForceSync={() => { void forceSync(); }}
+        />
+
         {view === 'kanban' ? (
           <KanbanBoard />
         ) : view === 'history' ? (
