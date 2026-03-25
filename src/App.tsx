@@ -1,4 +1,4 @@
-import { useState, useEffect, useEffectEvent } from 'react';
+import { useState, useEffect, useEffectEvent, startTransition } from 'react';
 import type { DDay, ArchivedDDay, EmotionLog } from './types';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { useTheme } from './hooks/useTheme';
@@ -12,25 +12,32 @@ import QuoteDisplay from './components/QuoteDisplay';
 import EmptyState from './components/EmptyState';
 import KanbanBoard from './components/KanbanBoard';
 import HistoryTimeline from './components/HistoryTimeline';
+import MissionControl from './components/MissionControl';
 import './App.css';
 
-type View = 'dday' | 'kanban' | 'history';
+type View = 'dday' | 'kanban' | 'history' | 'mission';
 
 export default function App() {
   const { status: syncStatus } = useSync();
   const { canInstall, promptInstall } = useInstallPrompt();
   const [theme, toggleTheme] = useTheme();
-  const [view, setView] = useLocalStorage<View>('app-view', 'kanban');
+  const [view, setView] = useLocalStorage<View>('app-view', 'mission');
   const [ddays, setDdays] = useLocalStorage<DDay[]>('dday-list', []);
   const [selectedId, setSelectedId] = useLocalStorage<string | null>('dday-selected', null);
   const [archivedDdays, setArchivedDdays] = useLocalStorage<ArchivedDDay[]>('dday-archive', []);
   const [showForm, setShowForm] = useState(false);
   const [sharedData, setSharedData] = useState<Partial<DDay> | null>(null);
 
+  const navigateTo = (nextView: View) => {
+    startTransition(() => {
+      setView(nextView);
+    });
+  };
+
   const applySharedLink = useEffectEvent((shared: Partial<DDay>) => {
     setSharedData(shared);
     setShowForm(true);
-    setView('dday');
+    navigateTo('dday');
     window.history.replaceState({}, '', window.location.pathname);
   });
 
@@ -52,6 +59,7 @@ export default function App() {
     setSelectedId(dday.id);
     setShowForm(false);
     setSharedData(null);
+    navigateTo('dday');
   };
 
   const handleDelete = (id: string) => {
@@ -96,7 +104,7 @@ export default function App() {
     setDdays(prev => [dday, ...prev]);
     setArchivedDdays(prev => prev.filter(a => a.id !== id));
     setSelectedId(id);
-    setView('dday');
+    navigateTo('dday');
   };
 
   const handlePermanentDelete = (id: string) => {
@@ -116,7 +124,10 @@ export default function App() {
         onToggleTheme={toggleTheme}
         showInstall={canInstall}
         onInstall={() => { void promptInstall(); }}
-        onAddNew={() => { setView('dday'); setShowForm(true); }}
+        onAddNew={() => {
+          navigateTo('dday');
+          setShowForm(true);
+        }}
       />
 
       {/* Sync indicator */}
@@ -141,8 +152,18 @@ export default function App() {
       {/* Tab Navigation */}
       <nav className="tab-bar">
         <button
+          className={`tab ${view === 'mission' ? 'active' : ''}`}
+          onClick={() => navigateTo('mission')}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M4 18L10 12l4 4 6-8" />
+            <path d="M3 20h18" />
+          </svg>
+          미션 컨트롤
+        </button>
+        <button
           className={`tab ${view === 'kanban' ? 'active' : ''}`}
-          onClick={() => setView('kanban')}
+          onClick={() => navigateTo('kanban')}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <rect x="3" y="3" width="7" height="18" rx="2" />
@@ -152,7 +173,7 @@ export default function App() {
         </button>
         <button
           className={`tab ${view === 'dday' ? 'active' : ''}`}
-          onClick={() => setView('dday')}
+          onClick={() => navigateTo('dday')}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <circle cx="12" cy="12" r="9" />
@@ -162,7 +183,7 @@ export default function App() {
         </button>
         <button
           className={`tab ${view === 'history' ? 'active' : ''}`}
-          onClick={() => setView('history')}
+          onClick={() => navigateTo('history')}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <rect x="2" y="3" width="20" height="5" rx="1" />
@@ -174,7 +195,21 @@ export default function App() {
       </nav>
 
       <main className="app-main">
-        {view === 'kanban' ? (
+        {view === 'mission' ? (
+          <MissionControl
+            ddays={ddays}
+            archivedDdays={archivedDdays}
+            selectedId={selectedId}
+            onFocusDDay={(id) => {
+              setSelectedId(id);
+              navigateTo('dday');
+            }}
+            onCreateDDay={() => {
+              navigateTo('dday');
+              setShowForm(true);
+            }}
+          />
+        ) : view === 'kanban' ? (
           <KanbanBoard />
         ) : view === 'history' ? (
           <HistoryTimeline
