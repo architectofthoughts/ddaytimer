@@ -2,6 +2,7 @@ import { useDeferredValue } from 'react';
 import type { ArchivedDDay, DDay, EmotionLog } from '../types';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { buildMissionControlSnapshot } from '../utils/missionControl';
+import ForecastLab from './ForecastLab';
 
 interface MissionControlProps {
   ddays: DDay[];
@@ -21,6 +22,7 @@ export default function MissionControl({
   const [emotionLog] = useLocalStorage<EmotionLog>('emotion-log', {});
   const deferredDdays = useDeferredValue(ddays);
   const deferredArchived = useDeferredValue(archivedDdays);
+  const highlightedDday = deferredDdays.find(item => item.id === selectedId) ?? deferredDdays[0];
   const snapshot = buildMissionControlSnapshot(
     deferredDdays,
     deferredArchived,
@@ -152,6 +154,13 @@ export default function MissionControl({
             </div>
           )}
         </section>
+
+        <ForecastLab
+          key={highlightedDday?.id ?? 'forecast-empty'}
+          dday={highlightedDday}
+          archivedDdays={deferredArchived}
+          emotionEntries={highlightedDday ? (emotionLog[highlightedDday.id] ?? []) : []}
+        />
 
         <section className="mission-panel">
           <div className="mission-panel-header">

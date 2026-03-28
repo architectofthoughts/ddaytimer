@@ -1883,6 +1883,188 @@
   align-items: flex-start;
 }
 
+.mission-forecast-panel {
+  position: relative;
+  overflow: hidden;
+}
+
+.mission-forecast-panel::after {
+  content: '';
+  position: absolute;
+  inset: auto -40px -70px auto;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(160, 132, 92, 0.12), transparent 70%);
+  pointer-events: none;
+}
+
+.forecast-status {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  border-radius: 16px;
+  padding: 1rem;
+  margin-bottom: 0.85rem;
+  border: 1px solid var(--border-color);
+  background: var(--bg-input);
+}
+
+.forecast-status strong {
+  font-size: 1.9rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.forecast-status h4 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-top: 0.2rem;
+}
+
+.forecast-status-label,
+.forecast-metric-label,
+.forecast-signal span,
+.forecast-control-meta,
+.forecast-preset small {
+  color: var(--text-muted);
+  font-size: 0.74rem;
+}
+
+.forecast-status.status-risk {
+  background: linear-gradient(180deg, var(--bg-input), rgba(201, 82, 77, 0.08));
+}
+
+.forecast-status.status-balanced {
+  background: linear-gradient(180deg, var(--bg-input), rgba(160, 132, 92, 0.08));
+}
+
+.forecast-status.status-push,
+.forecast-status.status-overdrive {
+  background: linear-gradient(180deg, var(--bg-input), rgba(123, 101, 68, 0.12));
+}
+
+.forecast-copy {
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 0.9rem;
+  max-width: 68ch;
+}
+
+.forecast-presets,
+.forecast-controls,
+.forecast-metric-grid,
+.forecast-signal-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.forecast-presets,
+.forecast-controls,
+.forecast-metric-grid {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.forecast-preset,
+.forecast-control,
+.forecast-metric-card,
+.forecast-signal {
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-input);
+}
+
+.forecast-preset {
+  padding: 0.85rem 0.9rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+  text-align: left;
+  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.forecast-preset span {
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.forecast-preset:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.forecast-preset.active {
+  border-color: var(--accent);
+  background: linear-gradient(180deg, var(--bg-input), var(--accent-bg));
+}
+
+.forecast-control,
+.forecast-metric-card,
+.forecast-signal {
+  padding: 0.95rem;
+}
+
+.forecast-control {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.forecast-control-header,
+.forecast-control-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.forecast-control-header strong,
+.forecast-metric-card strong,
+.forecast-signal strong {
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.forecast-range {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+.forecast-metric-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.forecast-metric-card strong {
+  font-size: 1.55rem;
+}
+
+.forecast-metric-card p {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.forecast-signal-list {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  margin-top: 0.1rem;
+}
+
+.forecast-signal {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+@media (max-width: 767px) {
+  .forecast-status {
+    flex-direction: column;
+  }
+}
+
 @media (min-width: 768px) {
   .mission-hero {
     flex-direction: row;
