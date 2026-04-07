@@ -1451,6 +1451,12 @@
   border-bottom: 1px solid var(--border-color);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.tab-bar::-webkit-scrollbar {
+  display: none;
 }
 
 .tab {
@@ -1464,6 +1470,7 @@
   color: var(--text-muted);
   transition: all 0.2s ease;
   min-height: 36px;
+  flex-shrink: 0;
 }
 
 .tab:hover {
@@ -1475,6 +1482,603 @@
   color: var(--accent);
   background: var(--accent-bg);
   font-weight: 600;
+}
+
+/* ===== Mission Control ===== */
+.mission-control {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.mission-hero,
+.mission-panel,
+.mission-empty-card,
+.mission-stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-md);
+}
+
+.mission-hero,
+.mission-empty-card {
+  border-radius: 20px;
+  padding: 1.25rem;
+}
+
+.mission-hero {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.mission-hero::after {
+  content: '';
+  position: absolute;
+  inset: auto -10% -35% auto;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(160, 132, 92, 0.18), transparent 68%);
+  pointer-events: none;
+}
+
+.mission-eyebrow,
+.mission-panel-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+}
+
+.mission-title {
+  font-size: 1.45rem;
+  font-weight: 800;
+  margin-top: 0.25rem;
+}
+
+.mission-copy,
+.mission-panel-subcopy,
+.mission-empty-card p {
+  color: var(--text-secondary);
+  line-height: 1.6;
+  max-width: 60ch;
+}
+
+.mission-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: flex-start;
+  padding: 0.65rem 0.9rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+  color: #fff;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  font-weight: 700;
+  box-shadow: 0 10px 30px rgba(139, 115, 85, 0.2);
+}
+
+.mission-stat-grid,
+.mission-grid {
+  display: grid;
+  gap: 0.875rem;
+}
+
+.mission-stat-grid {
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+.mission-stat-card {
+  border-radius: 16px;
+  padding: 1rem;
+}
+
+.mission-stat-card.accent {
+  background: linear-gradient(180deg, var(--bg-card), rgba(160, 132, 92, 0.08));
+}
+
+.mission-stat-card.danger {
+  background: linear-gradient(180deg, var(--bg-card), rgba(201, 82, 77, 0.08));
+}
+
+.mission-stat-label {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-bottom: 0.45rem;
+}
+
+.mission-stat-value {
+  display: block;
+  font-size: 1.7rem;
+  font-weight: 800;
+  margin-bottom: 0.35rem;
+}
+
+.mission-stat-detail {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.mission-grid {
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+.mission-panel {
+  border-radius: 18px;
+  padding: 1.1rem;
+}
+
+.mission-panel-wide {
+  grid-column: span 1;
+}
+
+.mission-panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+}
+
+.mission-panel-header h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-top: 0.2rem;
+}
+
+.mission-panel-note {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+.mission-panel-action {
+  padding-inline: 1rem;
+}
+
+.mission-focus-list,
+.mission-archive-list,
+.mission-milestones {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.mission-focus-card,
+.mission-archive-card {
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-input);
+}
+
+.mission-focus-card {
+  padding: 0.9rem;
+  text-align: left;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.mission-focus-card:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.mission-focus-card.selected {
+  border-color: var(--accent);
+  background: linear-gradient(180deg, var(--bg-input), var(--accent-bg));
+}
+
+.mission-focus-top,
+.mission-focus-bottom,
+.mission-focus-progress,
+.mission-archive-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.mission-focus-top {
+  align-items: flex-start;
+  margin-bottom: 0.7rem;
+}
+
+.mission-focus-top h4,
+.mission-archive-card h4 {
+  font-size: 0.98rem;
+  font-weight: 700;
+}
+
+.mission-focus-phase {
+  display: inline-flex;
+  margin-bottom: 0.25rem;
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.mission-focus-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.45rem;
+}
+
+.mission-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.6rem;
+  border-radius: 999px;
+  background: var(--bg-card);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.mission-chip.tone-긴급 {
+  color: var(--danger);
+  background: var(--danger-bg);
+}
+
+.mission-chip.tone-주의 {
+  color: var(--accent);
+  background: var(--accent-bg);
+}
+
+.mission-chip.tone-안정 {
+  color: var(--text-secondary);
+}
+
+.mission-focus-progress {
+  margin-bottom: 0.65rem;
+  font-size: 0.76rem;
+  color: var(--text-secondary);
+}
+
+.mission-focus-bar {
+  flex: 1;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--progress-track);
+  overflow: hidden;
+}
+
+.mission-focus-bar-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+}
+
+.mission-focus-bottom,
+.mission-archive-meta {
+  color: var(--text-muted);
+  font-size: 0.76rem;
+}
+
+.mission-milestone {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.mission-milestone:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.mission-milestone:first-child {
+  padding-top: 0;
+}
+
+.mission-milestone-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--text-muted);
+}
+
+.mission-milestone.done .mission-milestone-dot {
+  background: var(--accent);
+  box-shadow: 0 0 0 5px var(--accent-bg);
+}
+
+.mission-milestone-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+  min-width: 0;
+}
+
+.mission-milestone-copy strong {
+  font-size: 0.9rem;
+}
+
+.mission-milestone-copy span,
+.mission-milestone-relative {
+  color: var(--text-muted);
+  font-size: 0.76rem;
+}
+
+.mission-emotion-chart {
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  gap: 0.45rem;
+  margin-top: 1rem;
+}
+
+.mission-emotion-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.mission-emotion-column span {
+  color: var(--text-muted);
+  font-size: 0.66rem;
+}
+
+.mission-emotion-track {
+  width: 100%;
+  max-width: 28px;
+  height: 96px;
+  border-radius: 999px;
+  background: var(--bg-input);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+}
+
+.mission-emotion-fill {
+  width: 100%;
+  border-radius: inherit;
+  background: linear-gradient(180deg, var(--gradient-end), var(--gradient-start));
+}
+
+.mission-emotion-empty {
+  width: 100%;
+  height: 14%;
+  border-radius: inherit;
+  background: linear-gradient(180deg, transparent, rgba(139, 115, 85, 0.12));
+}
+
+.mission-archive-card {
+  padding: 0.85rem 0.9rem;
+}
+
+.mission-panel-empty {
+  border-radius: 14px;
+  padding: 1rem;
+  background: var(--bg-input);
+  color: var(--text-secondary);
+  font-size: 0.86rem;
+  line-height: 1.6;
+}
+
+.mission-empty {
+  min-height: 55vh;
+  justify-content: center;
+}
+
+.mission-empty-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  align-items: flex-start;
+}
+
+.mission-forecast-panel {
+  position: relative;
+  overflow: hidden;
+}
+
+.mission-forecast-panel::after {
+  content: '';
+  position: absolute;
+  inset: auto -40px -70px auto;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(160, 132, 92, 0.12), transparent 70%);
+  pointer-events: none;
+}
+
+.forecast-status {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  border-radius: 16px;
+  padding: 1rem;
+  margin-bottom: 0.85rem;
+  border: 1px solid var(--border-color);
+  background: var(--bg-input);
+}
+
+.forecast-status strong {
+  font-size: 1.9rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.forecast-status h4 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-top: 0.2rem;
+}
+
+.forecast-status-label,
+.forecast-metric-label,
+.forecast-signal span,
+.forecast-control-meta,
+.forecast-preset small {
+  color: var(--text-muted);
+  font-size: 0.74rem;
+}
+
+.forecast-status.status-risk {
+  background: linear-gradient(180deg, var(--bg-input), rgba(201, 82, 77, 0.08));
+}
+
+.forecast-status.status-balanced {
+  background: linear-gradient(180deg, var(--bg-input), rgba(160, 132, 92, 0.08));
+}
+
+.forecast-status.status-push,
+.forecast-status.status-overdrive {
+  background: linear-gradient(180deg, var(--bg-input), rgba(123, 101, 68, 0.12));
+}
+
+.forecast-copy {
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 0.9rem;
+  max-width: 68ch;
+}
+
+.forecast-presets,
+.forecast-controls,
+.forecast-metric-grid,
+.forecast-signal-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.forecast-presets,
+.forecast-controls,
+.forecast-metric-grid {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.forecast-preset,
+.forecast-control,
+.forecast-metric-card,
+.forecast-signal {
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-input);
+}
+
+.forecast-preset {
+  padding: 0.85rem 0.9rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+  text-align: left;
+  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.forecast-preset span {
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.forecast-preset:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.forecast-preset.active {
+  border-color: var(--accent);
+  background: linear-gradient(180deg, var(--bg-input), var(--accent-bg));
+}
+
+.forecast-control,
+.forecast-metric-card,
+.forecast-signal {
+  padding: 0.95rem;
+}
+
+.forecast-control {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.forecast-control-header,
+.forecast-control-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.forecast-control-header strong,
+.forecast-metric-card strong,
+.forecast-signal strong {
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.forecast-range {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+.forecast-metric-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.forecast-metric-card strong {
+  font-size: 1.55rem;
+}
+
+.forecast-metric-card p {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.forecast-signal-list {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  margin-top: 0.1rem;
+}
+
+.forecast-signal {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+@media (max-width: 767px) {
+  .forecast-status {
+    flex-direction: column;
+  }
+}
+
+@media (min-width: 768px) {
+  .mission-hero {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+
+  .mission-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .mission-panel-wide {
+    grid-column: span 2;
+  }
 }
 
 /* ===== Kanban Board ===== */
